@@ -32,5 +32,7 @@ FROM base_image
 RUN apk add --no-cache ca-certificates openssl pcre zlib ffmpeg
 COPY --from=build /usr/local/nginx /usr/local/nginx
 RUN rm -rf /usr/local/nginx/html /usr/local/nginx/conf/*.default
+EXPOSE 80 443
+
 ENTRYPOINT ["/usr/local/nginx/sbin/nginx"]
 CMD ["-g", "daemon off;"]
