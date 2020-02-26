@@ -1,4 +1,4 @@
-FROM alpine:3.8 AS base_image
+FROM alpine:3.10.1 AS base_image
 
 FROM base_image AS build
 
@@ -7,8 +7,8 @@ RUN apk add --no-cache perl perl-dev
 RUN apk add --no-cache geoip geoip-dev 
 RUN mkdir nginx nginx-vod-module
 
-ENV NGINX_VERSION 1.14.0
-ENV VOD_MODULE_VERSION 1.23
+ENV NGINX_VERSION 1.16.1
+ENV VOD_MODULE_VERSION 2b36aea4f35bf9d302328c09b572980b78cf6fa8
 ENV AKAMAI_MODULE_VERSION master
 
 RUN curl -sL https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz | tar -C nginx --strip 1 -xz
@@ -17,7 +17,7 @@ RUN curl -sL https://github.com/kaltura/nginx-akamai-token-validate-module/archi
 RUN curl -sL https://github.com/kaltura/nginx-secure-token-module/archive/master.tar.gz |  tar -xz 
 RUN curl -sL https://github.com/openresty/echo-nginx-module/archive/master.tar.gz | tar -xz
 
-WORKDIR nginx
+WORKDIR /nginx
 RUN ./configure --prefix=/usr/local/nginx \
 	--user=nginx \
 	--group=nginx \
@@ -78,10 +78,12 @@ RUN ./configure --prefix=/usr/local/nginx \
 	--with-cc-opt=-O3
 RUN make
 RUN make install
+RUN rm -rf /usr/local/nginx/html /usr/local/nginx/conf/*.default
 
 FROM base_image
 RUN apk add --no-cache ca-certificates openssl pcre zlib ffmpeg
 COPY --from=build /usr/local/nginx /usr/local/nginx
+
 RUN rm -rf /usr/local/nginx/html /usr/local/nginx/conf/*.default
 EXPOSE 80 443
 
